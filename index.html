@@ -3,46 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Showdown - GitHub Edition</title>
+    <title>Math Showdown: Pro Lobby - Mehmet Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00d2ff; --accent: #9d50bb; --bg: #020205; --danger: #ff4b2b; --gold: #ffd700; }
+        :root { --primary: #00d2ff; --accent: #9d50bb; --bg: #020205; --danger: #ff4b2b; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.05); }
         body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         
         .card { background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 210, 255, 0.3); box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); width: 500px; text-align: center; }
         .hidden { display: none; }
 
-        /* Lobi ve Giriş */
+        /* Lobi Tasarımı */
         .avatar-upload { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 15px; cursor: pointer; object-fit: cover; background: #111; display: block; }
-        .player-list { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin: 15px 0; text-align: left; }
-        .player-entry { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333; }
-        .player-entry:last-child { border: none; }
-        .mod-badge { font-size: 10px; background: gold; color: black; padding: 2px 5px; border-radius: 4px; font-weight: bold; }
-
-        /* Ayarlar Grid */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .setting-item { text-align: left; }
-        .setting-item label { font-size: 11px; color: #888; text-transform: uppercase; }
-        input[type="text"], input[type="number"] { background: #1a1a2e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 85%; font-family: 'Orbitron'; }
-
-        /* Oyun Görselleri */
-        #num-display { font-family: 'Orbitron'; font-size: 120px; height: 160px; display: flex; align-items: center; justify-content: center; }
-        .hp-container { display: flex; gap: 15px; margin-bottom: 20px; }
-        .hp-box { flex: 1; }
-        .hp-bar { height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        .hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), #ff8e53); transition: width 0.5s; }
+        .player-list { background: var(--glass); border-radius: 12px; padding: 15px; margin: 15px 0; min-height: 80px; }
+        .player-entry { display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid #333; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        /* Ayarlar */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; text-align: left; }
+        label { font-size: 11px; color: #888; text-transform: uppercase; }
+        input { background: #1a1a2e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 85%; font-family: 'Orbitron'; }
 
         .btn { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; font-family: 'Orbitron'; margin-top: 10px; transition: 0.3s; }
-        .btn:disabled { background: #333; cursor: not-allowed; opacity: 0.5; }
+        .btn:disabled { background: #222 !important; cursor: not-allowed; opacity: 0.3; filter: grayscale(1); }
+        .btn-pve { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-pve:hover { background: var(--accent); color: white; }
+
+        /* Oyun Sahası */
+        #num-display { font-family: 'Orbitron'; font-size: 120px; height: 160px; display: flex; align-items: center; justify-content: center; }
+        .hp-container { display: flex; gap: 15px; margin-bottom: 20px; }
+        .hp-bar { height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), #ff8e53); transition: width 0.5s; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2 style="font-family: 'Orbitron'; color: var(--primary);">SİSTEME GİRİŞ</h2>
+        <h2 style="font-family: 'Orbitron'; color: var(--primary);">SYSTEM LOGIN</h2>
         <img id="avatar-preview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar-upload" onclick="document.getElementById('file-input').click()">
         <input type="file" id="file-input" class="hidden" accept="image/*">
-        <input type="text" id="username" placeholder="Pilot Adı Girin...">
+        <input type="text" id="username" placeholder="Pilot İsmi...">
         <button class="btn" onclick="joinLobby()">LOBİYE KATIL</button>
     </div>
 
@@ -52,96 +51,108 @@
         <div class="player-list" id="player-list">
             </div>
 
-        <div id="moderator-panel" class="hidden">
+        <div id="mod-panel" class="hidden">
             <div class="settings-grid">
-                <div class="setting-item"><label>Sayı Adedi</label><input type="number" id="cfg-count" value="5"></div>
-                <div class="setting-item"><label>Hız (sn)</label><input type="number" id="cfg-speed" value="0.8" step="0.1"></div>
-                <div class="setting-item"><label>Basamak</label><input type="number" id="cfg-digits" value="2"></div>
-                <div class="setting-item"><label>Başlangıç HP</label><input type="number" id="cfg-hp" value="100"></div>
+                <div><label>Sayı Adedi</label><input type="number" id="cfg-count" value="5"></div>
+                <div><label>Hız (sn)</label><input type="number" id="cfg-speed" value="0.8" step="0.1"></div>
+                <div><label>Basamak</label><input type="number" id="cfg-digits" value="2"></div>
+                <div><label>Başlangıç HP</label><input type="number" id="cfg-hp" value="100"></div>
             </div>
-            <label style="font-size: 12px; color: var(--danger); display: block; margin-top: 10px;">
-                <input type="checkbox" id="cfg-neg"> Negatif Sayılar (Zor Mod)
-            </label>
+            <div style="margin-top: 10px; font-size: 12px;">
+                <input type="checkbox" id="cfg-neg"> <label for="cfg-neg" style="color: var(--danger);">ZOR MOD (NEGATİF SAYILAR)</label>
+            </div>
         </div>
 
-        <button id="start-btn" class="btn" disabled onclick="startGame()">OYUNU BAŞLAT</button>
-        <p id="wait-msg" style="font-size: 12px; color: #666; margin-top: 10px;">En az 2 oyuncu gerekli...</p>
+        <button id="start-btn" class="btn" disabled onclick="startGame(false)">OYUNU BAŞLAT</button>
+        <button id="pve-btn" class="btn btn-pve" onclick="startGame(true)">BİLGİSAYARA KARŞI OYNA</button>
+        
+        <p id="lobby-status" style="font-size: 11px; color: #555; margin-top: 15px;">Gerçek oyuncu bekleniyor...</p>
     </div>
 
     <div id="game-screen" class="card hidden">
         <div class="hp-container" id="hp-ui"></div>
-        <div id="num-display">READY</div>
-        <div id="input-zone" class="hidden">
+        <div id="num-display">...</div>
+        <div id="action-zone" class="hidden">
             <input type="number" id="user-guess" placeholder="Toplam?" style="width: 150px; font-size: 24px;">
-            <button class="btn" onclick="submitGuess()" style="width: auto; padding: 10px 30px;">GÖNDER</button>
+            <button class="btn" onclick="submitGuess()" style="width: auto; padding: 10px 40px;">GÖNDER</button>
         </div>
     </div>
 
 <script>
-    let localPlayer = { id: Date.now(), name: "", avatar: "", isMod: false, hp: 100 };
+    let me = { id: 1, name: "", avatar: "", isMod: false, hp: 100 };
     let roomPlayers = [];
-    let gameConfig = {};
-    let currentSum = 0;
+    let config = {};
+    let total = 0;
 
-    // Fotoğraf Yükleme
-    document.getElementById('file-input').onchange = function(e) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            document.getElementById('avatar-preview').src = reader.result;
-            localPlayer.avatar = reader.result;
-        };
-        reader.readAsDataURL(e.target.files[0]);
+    // Foto Seçimi
+    document.getElementById('file-input').onchange = e => {
+        const r = new FileReader();
+        r.onload = () => { document.getElementById('avatar-preview').src = r.result; me.avatar = r.result; };
+        r.readAsDataURL(e.target.files[0]);
     };
 
     function joinLobby() {
-        localPlayer.name = document.getElementById('username').value || "Oyuncu_" + Math.floor(Math.random()*100);
-        if(!localPlayer.avatar) localPlayer.avatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-
-        // GitHub üzerinde tek başına açtığında seni her zaman mod yapar
-        // Eğer bir oda sistemi olsaydı, ilk giren mod olurdu
-        localPlayer.isMod = true; 
-        roomPlayers.push(localPlayer);
-
+        me.name = document.getElementById('username').value || "Pilot_1";
+        if(!me.avatar) me.avatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        
+        me.isMod = true; // İlk giren mod olur
+        roomPlayers.push(me);
+        
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('lobby-screen').classList.remove('hidden');
+        document.getElementById('mod-panel').classList.remove('hidden');
+        
+        updateLobbyUI();
 
-        // SİMÜLASYON: 2. oyuncu (Bot) GitHub testleri için otomatik eklenir
-        setTimeout(() => {
+        // TEST AMAÇLI: 5 saniye sonra "Gerçek Oyuncu" gelmiş gibi yapmak istersen 
+        // aşağıdaki satırı yorumdan çıkarabilirsin:
+        // setTimeout(simulateSecondPlayer, 5000);
+    }
+
+    function simulateSecondPlayer() {
+        if(roomPlayers.length < 2) {
             roomPlayers.push({
-                id: 99,
-                name: "Zeynep Yüsra (Bot)",
-                avatar: "https://cdn-icons-png.flaticon.com/512/6833/6833605.png",
+                id: 2,
+                name: "Gerçek_Oyuncu_X",
+                avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
                 isMod: false,
                 hp: 100
             });
             updateLobbyUI();
-        }, 1500);
-
-        updateLobbyUI();
+        }
     }
 
     function updateLobbyUI() {
         const list = document.getElementById('player-list');
         list.innerHTML = roomPlayers.map(p => `
             <div class="player-entry">
-                <img src="${p.avatar}" style="width:30px; height:30px; border-radius:50%">
-                <span style="flex:1">${p.name}</span>
-                ${p.isMod ? '<span class="mod-badge">MODERATÖR</span>' : ''}
+                <img src="${p.avatar}" style="width:35px; height:35px; border-radius:50%; border:1px solid var(--primary)">
+                <span style="flex:1; font-weight:bold;">${p.name}</span>
+                ${p.isMod ? '<span style="font-size:10px; color:gold;">[MOD]</span>' : ''}
             </div>
         `).join('');
 
-        if (localPlayer.isMod) {
-            document.getElementById('moderator-panel').classList.remove('hidden');
-            if (roomPlayers.length >= 2) {
-                document.getElementById('start-btn').disabled = false;
-                document.getElementById('wait-msg').style.color = "var(--primary)";
-                document.getElementById('wait-msg').innerText = "Sistem Hazır! Operasyonu Başlatın.";
-            }
+        const startBtn = document.getElementById('start-btn');
+        if (roomPlayers.length >= 2) {
+            startBtn.disabled = false;
+            document.getElementById('lobby-status').innerText = "OYUNCU BULUNDU. BAŞLATILABİLİR.";
+            document.getElementById('lobby-status').style.color = "var(--primary)";
         }
     }
 
-    function startGame() {
-        gameConfig = {
+    function startGame(isPvE) {
+        if (isPvE && roomPlayers.length === 1) {
+            // Bilgisayara karşı modu seçildi, botu şimdi ekle
+            roomPlayers.push({
+                id: 99,
+                name: "SİSTEM (BOT)",
+                avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+                isMod: false,
+                hp: 100
+            });
+        }
+
+        config = {
             count: parseInt(document.getElementById('cfg-count').value),
             speed: parseFloat(document.getElementById('cfg-speed').value) * 1000,
             digits: parseInt(document.getElementById('cfg-digits').value),
@@ -149,82 +160,81 @@
             neg: document.getElementById('cfg-neg').checked
         };
 
-        roomPlayers.forEach(p => p.hp = gameConfig.hp);
+        roomPlayers.forEach(p => p.hp = config.hp);
         
         document.getElementById('lobby-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         
         renderHealth();
-        runNumbers();
+        playGame();
     }
 
     function renderHealth() {
         const ui = document.getElementById('hp-ui');
         ui.innerHTML = roomPlayers.map(p => `
-            <div class="hp-box">
-                <div style="font-size: 11px; text-align: left;">${p.name}</div>
+            <div style="flex:1">
+                <div style="font-size:11px; text-align:left;">${p.name}</div>
                 <div class="hp-bar"><div id="bar-${p.id}" class="hp-fill"></div></div>
             </div>
         `).join('');
     }
 
-    async function runNumbers() {
+    async function playGame() {
         const display = document.getElementById('num-display');
-        currentSum = 0;
+        total = 0;
 
-        for (let i = 0; i < gameConfig.count; i++) {
-            let min = Math.pow(10, gameConfig.digits - 1);
-            let max = Math.pow(10, gameConfig.digits) - 1;
+        for (let i = 0; i < config.count; i++) {
+            let min = Math.pow(10, config.digits - 1);
+            let max = Math.pow(10, config.digits) - 1;
             let n = Math.floor(Math.random() * (max - min + 1)) + min;
             
-            if (gameConfig.neg && Math.random() < 0.2) n = -n;
-            currentSum += n;
+            if (config.neg && Math.random() < 0.2) n = -n;
+            total += n;
 
             display.innerText = (n > 0 ? "+" : "") + n;
             display.style.color = n < 0 ? "var(--danger)" : "var(--primary)";
             
-            await new Promise(r => setTimeout(r, gameConfig.speed));
+            await new Promise(r => setTimeout(r, config.speed));
             display.innerText = "";
             await new Promise(r => setTimeout(r, 80));
         }
 
         display.innerText = "???";
-        display.style.color = "white";
-        document.getElementById('input-zone').classList.remove('hidden');
+        document.getElementById('action-zone').classList.remove('hidden');
     }
 
     function submitGuess() {
-        const guess = parseInt(document.getElementById('user-guess').value);
-        if(isNaN(guess)) return;
+        const myGuess = parseInt(document.getElementById('user-guess').value);
+        if(isNaN(myGuess)) return;
 
-        // Bot tahmini simülasyonu
-        const botGuess = currentSum + (Math.floor(Math.random() * 10) - 5);
+        // Bot tahmini (PvE ise) veya 2. Oyuncu simülasyonu
+        const otherGuess = total + (Math.floor(Math.random() * 10) - 5);
         
-        const myDiff = Math.abs(currentSum - guess);
-        const botDiff = Math.abs(currentSum - botGuess);
+        const myDiff = Math.abs(total - myGuess);
+        const otherDiff = Math.abs(total - otherGuess);
 
-        if (myDiff > botDiff) {
-            localPlayer.hp -= myDiff;
-        } else if (botDiff > myDiff) {
-            roomPlayers.find(p => p.id === 99).hp -= botDiff;
+        if (myDiff > otherDiff) {
+            roomPlayers[0].hp -= myDiff;
+        } else if (otherDiff > myDiff) {
+            roomPlayers[1].hp -= otherDiff;
         }
 
-        updateHealthUI();
+        updateUI();
     }
 
-    function updateHealthUI() {
+    function updateUI() {
         roomPlayers.forEach(p => {
             const bar = document.getElementById(`bar-${p.id}`);
-            bar.style.width = (p.hp / gameConfig.hp * 100) + "%";
+            bar.style.width = (p.hp / config.hp * 100) + "%";
         });
 
         if (roomPlayers.some(p => p.hp <= 0)) {
-            alert("Operasyon Tamamlandı!");
+            alert("OYUN TAMAMLANDI");
             location.reload();
         } else {
-            document.getElementById('input-zone').classList.add('hidden');
+            document.getElementById('action-zone').classList.add('hidden');
             document.getElementById('user-guess').value = "";
-            setTimeout(runNumbers, 2000);
+            setTimeout(playGame, 2000);
         }
     }
 </script>
