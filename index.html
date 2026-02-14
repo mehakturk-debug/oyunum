@@ -2,23 +2,22 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Showdown PRO - Mehmet Engine</title>
+    <title>Math Showdown ULTIMATE - Mehmet Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00d2ff; --accent: #9d50bb; --bg: #020205; --danger: #ff4b2b; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.05); }
         body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .card { background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 210, 255, 0.3); box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); width: 480px; text-align: center; }
+        .card { background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 210, 255, 0.3); width: 480px; text-align: center; }
         .hidden { display: none; }
         .avatar-upload { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 15px; cursor: pointer; object-fit: cover; background: #111; display: block; }
         .player-list { background: var(--glass); border-radius: 12px; padding: 10px; margin: 15px 0; max-height: 120px; overflow-y: auto; }
-        .player-entry { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333; font-size: 14px; }
+        .player-entry { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333; }
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; text-align: left; }
         label { font-size: 11px; color: #888; text-transform: uppercase; }
         input { background: #1a1a2e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 85%; font-family: 'Orbitron'; }
         .btn { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; font-family: 'Orbitron'; margin-top: 10px; transition: 0.3s; }
         .btn:disabled { opacity: 0.2; cursor: not-allowed; }
-        #num-display { font-family: 'Orbitron'; font-size: 100px; height: 140px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 20px var(--primary); }
+        #num-display { font-family: 'Orbitron'; font-size: 100px; height: 140px; display: flex; align-items: center; justify-content: center; }
         .hp-bar { height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 5px; border: 1px solid #333; }
         .hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), #ff8e53); transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
@@ -26,16 +25,15 @@
 <body>
 
     <div id="login-screen" class="card">
-        <h2 style="font-family: 'Orbitron'; color: var(--primary); margin: 0;">MATH SHOWDOWN</h2>
-        <p style="font-size: 12px; color: #555; margin-bottom: 20px;">V2.5 - REAL-TIME CLOUD SYNC</p>
+        <h2 style="font-family: 'Orbitron'; color: var(--primary);">MATH LOGIN</h2>
         <img id="avatar-preview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar-upload" onclick="document.getElementById('file-input').click()">
         <input type="file" id="file-input" class="hidden" accept="image/*">
-        <input type="text" id="username" placeholder="Pilot Çağrı Adı...">
+        <input type="text" id="username" placeholder="Pilot Adı...">
         <button class="btn" onclick="joinLobby()">SİSTEME BAĞLAN</button>
     </div>
 
     <div id="lobby-screen" class="card hidden">
-        <h2 style="font-family: 'Orbitron'; color: var(--primary);">OPERASYON LOBİSİ</h2>
+        <h2 style="font-family: 'Orbitron'; color: var(--primary);">LOBİ</h2>
         <div class="player-list" id="player-list"></div>
         <div id="mod-panel" class="hidden">
             <div class="settings-grid">
@@ -44,13 +42,10 @@
                 <div><label>Basamak</label><input type="number" id="cfg-digits" value="2"></div>
                 <div><label>Başlangıç HP</label><input type="number" id="cfg-hp" value="100"></div>
             </div>
-            <label style="font-size: 11px; color: var(--danger); margin-top: 10px; display: block; cursor: pointer;">
-                <input type="checkbox" id="cfg-neg"> NEGATİF SAYILAR AKTİF
-            </label>
+            <label style="font-size: 11px; color: var(--danger); margin-top: 10px; display: block;"><input type="checkbox" id="cfg-neg"> NEGATİF SAYILAR</label>
         </div>
         <button id="start-btn" class="btn" disabled onclick="triggerStart()">OYUNU BAŞLAT</button>
-        <button id="pve-btn" class="btn" style="background:none; border:1px solid var(--accent); color:var(--accent);" onclick="startPvE()">BİLGİSAYARA KARŞI (PVE)</button>
-        <p id="status-info" style="font-size: 11px; color: #555; margin-top: 10px;">Sunucu bekleniyor...</p>
+        <button id="pve-btn" class="btn" style="background:none; border:1px solid var(--accent); color:var(--accent);" onclick="startPvE()">PVE MODU (BOT)</button>
     </div>
 
     <div id="game-screen" class="card hidden">
@@ -85,7 +80,6 @@
     let currentRoundId = null;
     let targetSum = 0;
 
-    // Fotoğraf Seçimi
     document.getElementById('file-input').onchange = e => {
         const r = new FileReader();
         r.onload = () => { document.getElementById('avatar-preview').src = r.result; me.avatar = r.result; };
@@ -99,7 +93,6 @@
         const snapshot = await get(roomRef);
         const data = snapshot.val();
         
-        // Eğer oda yoksa veya boşsa moderatör ol
         if(!data || !data.players) {
             me.isMod = true;
             await set(roomRef, { moderatorId: myId, status: 'lobby' });
@@ -121,7 +114,6 @@
             allPlayers = data.players || {};
             const playersArr = Object.values(allPlayers);
 
-            // 1. Lobi Güncelleme
             if(data.status === 'lobby') {
                 document.getElementById('player-list').innerHTML = playersArr.map(p => `
                     <div class="player-entry">
@@ -138,23 +130,21 @@
                 }
             }
 
-            // 2. Tur Başlatma Senkronizasyonu
             if(data.status === 'playing') {
                 document.getElementById('lobby-screen').classList.add('hidden');
                 document.getElementById('game-screen').classList.remove('hidden');
                 
-                // Eğer RoundId değiştiyse yeni turu başlat
                 if(data.roundId !== currentRoundId) {
                     currentRoundId = data.roundId;
                     startRound(data.config);
                 }
             }
 
-            // 3. HP ve Oyun Sonu Kontrolü
-            updateHPUI(data.config.hp || 100);
+            renderHP(data.config.hp || 100);
+            
             if(playersArr.some(p => p.hp <= 0)) {
                 const winner = playersArr.find(p => p.hp > 0);
-                alert("OPERASYON TAMAMLANDI!\nKazanan: " + (winner ? winner.name : "BERABERE"));
+                alert("OYUN BİTTİ! Kazanan: " + (winner ? winner.name : "Yok"));
                 location.reload(); 
             }
         });
@@ -169,14 +159,13 @@
             neg: document.getElementById('cfg-neg').checked,
             seed: Math.random()
         };
-        // İlk turu başlat
         await update(roomRef, { status: 'playing', config: config, roundId: Date.now() });
     };
 
     window.startPvE = async function() {
         const botId = 'bot_99';
         await set(ref(db, `mathRoom/players/${botId}`), {
-            id: botId, name: "SİSTEM (AI)", hp: 100, avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png", isMod: false
+            id: botId, name: "BOT_X", hp: 100, avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png", isMod: false
         });
         setTimeout(triggerStart, 500);
     };
@@ -184,18 +173,13 @@
     async function startRound(conf) {
         const display = document.getElementById('num-display');
         const actionZone = document.getElementById('action-zone');
-        const status = document.getElementById('round-status');
-        
         actionZone.classList.add('hidden');
-        status.innerText = "SAYILAR ANALİZ EDİLİYOR...";
         targetSum = 0;
         let rng = conf.seed;
 
         for (let i = 0; i < conf.count; i++) {
-            // Seeded Random Logic
             let n = Math.floor(Math.abs(Math.sin(rng++)) * (Math.pow(10, conf.digits) - Math.pow(10, conf.digits-1))) + Math.pow(10, conf.digits-1);
             if(conf.neg && Math.sin(rng++) > 0.5) n = -n;
-            
             targetSum += n;
             display.innerText = (n > 0 ? "+" : "") + n;
             display.style.color = n < 0 ? "var(--danger)" : "var(--primary)";
@@ -203,53 +187,39 @@
             display.innerText = "";
             await new Promise(r => setTimeout(r, 100));
         }
-
         display.innerText = "???";
-        display.style.color = "white";
-        status.innerText = "TAHMİNİNİZİ GİRİN!";
         actionZone.classList.remove('hidden');
     }
 
     window.submitGuess = async function() {
         const input = document.getElementById('user-guess');
-        const guess = parseInt(input.value);
-        if(isNaN(guess)) return;
-
-        const diff = Math.abs(targetSum - guess);
+        const diff = Math.abs(targetSum - parseInt(input.value));
         
-        // Kendi HP'ni düşür
         me.hp = Math.max(0, me.hp - diff);
         await update(ref(db, `mathRoom/players/${myId}`), { hp: me.hp });
 
-        // Bot varsa moderatör botu da yönetsin
         if(me.isMod && allPlayers['bot_99']) {
-            const botDiff = Math.floor(Math.random() * 12); 
-            let newBotHP = Math.max(0, allPlayers['bot_99'].hp - botDiff);
-            await update(ref(db, `mathRoom/players/bot_99`), { hp: newBotHP });
+            const botDiff = Math.floor(Math.random() * 10);
+            await update(ref(db, `mathRoom/players/bot_99`), { hp: Math.max(0, allPlayers['bot_99'].hp - botDiff) });
         }
 
         input.value = "";
         document.getElementById('action-zone').classList.add('hidden');
-        document.getElementById('round-status').innerText = "DİĞER OYUNCULAR BEKLENİYOR...";
+        document.getElementById('round-status').innerText = "BEKLEYİN...";
 
-        // MODERATÖR TURU YENİLER
         if(me.isMod) {
             setTimeout(async () => {
-                await update(roomRef, { 
-                    'config/seed': Math.random(), 
-                    'roundId': Date.now() 
-                });
+                await update(roomRef, { 'config/seed': Math.random(), 'roundId': Date.now() });
             }, 3000);
         }
     }
 
-    function updateHPUI(maxHp) {
+    function renderHP(maxHp) {
         const ui = document.getElementById('hp-ui');
-        const players = Object.values(allPlayers);
-        ui.innerHTML = players.map(p => `
+        ui.innerHTML = Object.values(allPlayers).map(p => `
             <div style="flex:1">
-                <div style="font-size:10px; color:${p.id===myId?'var(--primary)':'#777'}">${p.name}</div>
-                <div class="hp-bar"><div id="bar-${p.id}" class="hp-fill" style="width:${(p.hp/maxHp)*100}%"></div></div>
+                <div style="font-size:10px;">${p.name}</div>
+                <div class="hp-bar"><div class="hp-fill" style="width:${(p.hp/maxHp)*100}%"></div></div>
             </div>
         `).join('');
     }
