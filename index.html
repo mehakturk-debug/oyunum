@@ -3,34 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Showdown: Pro Lobby - Mehmet Engine</title>
+    <title>Math Showdown: Firebase Edition - Mehmet Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00d2ff; --accent: #9d50bb; --bg: #020205; --danger: #ff4b2b; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.05); }
         body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
         .card { background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); padding: 30px; border-radius: 24px; border: 1px solid rgba(0, 210, 255, 0.3); box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); width: 500px; text-align: center; }
         .hidden { display: none; }
-
-        /* Lobi Tasarımı */
         .avatar-upload { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 15px; cursor: pointer; object-fit: cover; background: #111; display: block; }
         .player-list { background: var(--glass); border-radius: 12px; padding: 15px; margin: 15px 0; min-height: 80px; }
         .player-entry { display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid #333; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        
-        /* Ayarlar */
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; text-align: left; }
         label { font-size: 11px; color: #888; text-transform: uppercase; }
         input { background: #1a1a2e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 85%; font-family: 'Orbitron'; }
-
         .btn { background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; font-family: 'Orbitron'; margin-top: 10px; transition: 0.3s; }
-        .btn:disabled { background: #222 !important; cursor: not-allowed; opacity: 0.3; filter: grayscale(1); }
-        .btn-pve { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-        .btn-pve:hover { background: var(--accent); color: white; }
-
-        /* Oyun Sahası */
+        .btn:disabled { background: #222 !important; cursor: not-allowed; opacity: 0.3; }
         #num-display { font-family: 'Orbitron'; font-size: 120px; height: 160px; display: flex; align-items: center; justify-content: center; }
-        .hp-container { display: flex; gap: 15px; margin-bottom: 20px; }
         .hp-bar { height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 5px; }
         .hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), #ff8e53); transition: width 0.5s; }
     </style>
@@ -47,10 +35,7 @@
 
     <div id="lobby-screen" class="card hidden">
         <h2 style="font-family: 'Orbitron'; color: var(--primary);">OPERASYON LOBİSİ</h2>
-        
-        <div class="player-list" id="player-list">
-            </div>
-
+        <div class="player-list" id="player-list"></div>
         <div id="mod-panel" class="hidden">
             <div class="settings-grid">
                 <div><label>Sayı Adedi</label><input type="number" id="cfg-count" value="5"></div>
@@ -58,19 +43,14 @@
                 <div><label>Basamak</label><input type="number" id="cfg-digits" value="2"></div>
                 <div><label>Başlangıç HP</label><input type="number" id="cfg-hp" value="100"></div>
             </div>
-            <div style="margin-top: 10px; font-size: 12px;">
-                <input type="checkbox" id="cfg-neg"> <label for="cfg-neg" style="color: var(--danger);">ZOR MOD (NEGATİF SAYILAR)</label>
-            </div>
         </div>
-
-        <button id="start-btn" class="btn" disabled onclick="startGame(false)">OYUNU BAŞLAT</button>
-        <button id="pve-btn" class="btn btn-pve" onclick="startGame(true)">BİLGİSAYARA KARŞI OYNA</button>
-        
-        <p id="lobby-status" style="font-size: 11px; color: #555; margin-top: 15px;">Gerçek oyuncu bekleniyor...</p>
+        <button id="start-btn" class="btn" disabled onclick="triggerStart()">OYUNU BAŞLAT</button>
+        <button id="pve-btn" class="btn" style="background:none; border:1px solid var(--accent); color:var(--accent);" onclick="startPvE()">BİLGİSAYARA KARŞI</button>
+        <p id="lobby-status" style="font-size: 11px; color: #555; margin-top: 15px;">Bağlantı bekleniyor...</p>
     </div>
 
     <div id="game-screen" class="card hidden">
-        <div class="hp-container" id="hp-ui"></div>
+        <div id="hp-ui" style="display:flex; gap:15px; margin-bottom:20px;"></div>
         <div id="num-display">...</div>
         <div id="action-zone" class="hidden">
             <input type="number" id="user-guess" placeholder="Toplam?" style="width: 150px; font-size: 24px;">
@@ -78,165 +58,150 @@
         </div>
     </div>
 
-<script>
-    let me = { id: 1, name: "", avatar: "", isMod: false, hp: 100 };
-    let roomPlayers = [];
-    let config = {};
-    let total = 0;
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Foto Seçimi
-    document.getElementById('file-input').onchange = e => {
-        const r = new FileReader();
-        r.onload = () => { document.getElementById('avatar-preview').src = r.result; me.avatar = r.result; };
-        r.readAsDataURL(e.target.files[0]);
+    const firebaseConfig = {
+        apiKey: "AIzaSyBcm1uY37IelMsTqoD0sAmsIH1nwBeYtCE",
+        authDomain: "sahtekar-2f5d2.firebaseapp.com",
+        databaseURL: "https://sahtekar-2f5d2-default-rtdb.europe-west1.firebasedatabase.app/",
+        projectId: "sahtekar-2f5d2",
+        appId: "1:223883537002:web:1c16bde374d11efb5d7813"
     };
 
-    function joinLobby() {
-        me.name = document.getElementById('username').value || "Pilot_1";
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const roomRef = ref(db, 'gameRoom');
+
+    let myId = Date.now().toString();
+    let me = { id: myId, name: "", avatar: "", isMod: false, hp: 100 };
+    let allPlayers = {};
+    let gameState = "lobby";
+
+    // --- LOBİ MANTIĞI ---
+    window.joinLobby = async function() {
+        me.name = document.getElementById('username').value || "Pilot_" + Math.floor(Math.random()*100);
         if(!me.avatar) me.avatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        
-        me.isMod = true; // İlk giren mod olur
-        roomPlayers.push(me);
-        
+
+        // Odadaki ilk kişi moderatör olur
+        onValue(roomRef, (snapshot) => {
+            const data = snapshot.val();
+            if(!data || !data.players) {
+                me.isMod = true;
+                update(roomRef, { moderatorId: myId, status: 'lobby' });
+            }
+            // Oyuncuyu kaydet
+            set(ref(db, `gameRoom/players/${myId}`), me);
+            onDisconnect(ref(db, `gameRoom/players/${myId}`)).remove();
+        }, { onlyOnce: true });
+
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('lobby-screen').classList.remove('hidden');
-        document.getElementById('mod-panel').classList.remove('hidden');
-        
-        updateLobbyUI();
+        listenRoom();
+    };
 
-        // TEST AMAÇLI: 5 saniye sonra "Gerçek Oyuncu" gelmiş gibi yapmak istersen 
-        // aşağıdaki satırı yorumdan çıkarabilirsin:
-        // setTimeout(simulateSecondPlayer, 5000);
+    function listenRoom() {
+        onValue(roomRef, (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
+
+            allPlayers = data.players || {};
+            const playersArray = Object.values(allPlayers);
+            
+            // Lobi UI Güncelle
+            const list = document.getElementById('player-list');
+            list.innerHTML = playersArray.map(p => `
+                <div class="player-entry">
+                    <img src="${p.avatar}" style="width:35px; height:35px; border-radius:50%">
+                    <span style="flex:1">${p.name}</span>
+                    ${p.id === data.moderatorId ? '<span style="color:gold; font-size:10px;">[MOD]</span>' : ''}
+                </div>
+            `).join('');
+
+            // Başlatma Kontrolü
+            if(myId === data.moderatorId) {
+                document.getElementById('mod-panel').classList.remove('hidden');
+                document.getElementById('start-btn').disabled = playersArray.length < 2;
+            }
+
+            // Oyun Başladı mı?
+            if(data.status === 'playing' && gameState === 'lobby') {
+                gameState = 'playing';
+                startActualGame(data.config);
+            }
+        });
     }
 
-    function simulateSecondPlayer() {
-        if(roomPlayers.length < 2) {
-            roomPlayers.push({
-                id: 2,
-                name: "Gerçek_Oyuncu_X",
-                avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-                isMod: false,
-                hp: 100
-            });
-            updateLobbyUI();
-        }
-    }
-
-    function updateLobbyUI() {
-        const list = document.getElementById('player-list');
-        list.innerHTML = roomPlayers.map(p => `
-            <div class="player-entry">
-                <img src="${p.avatar}" style="width:35px; height:35px; border-radius:50%; border:1px solid var(--primary)">
-                <span style="flex:1; font-weight:bold;">${p.name}</span>
-                ${p.isMod ? '<span style="font-size:10px; color:gold;">[MOD]</span>' : ''}
-            </div>
-        `).join('');
-
-        const startBtn = document.getElementById('start-btn');
-        if (roomPlayers.length >= 2) {
-            startBtn.disabled = false;
-            document.getElementById('lobby-status').innerText = "OYUNCU BULUNDU. BAŞLATILABİLİR.";
-            document.getElementById('lobby-status').style.color = "var(--primary)";
-        }
-    }
-
-    function startGame(isPvE) {
-        if (isPvE && roomPlayers.length === 1) {
-            // Bilgisayara karşı modu seçildi, botu şimdi ekle
-            roomPlayers.push({
-                id: 99,
-                name: "SİSTEM (BOT)",
-                avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
-                isMod: false,
-                hp: 100
-            });
-        }
-
-        config = {
+    // --- OYUN TETİKLEME ---
+    window.triggerStart = function() {
+        const config = {
             count: parseInt(document.getElementById('cfg-count').value),
             speed: parseFloat(document.getElementById('cfg-speed').value) * 1000,
             digits: parseInt(document.getElementById('cfg-digits').value),
             hp: parseInt(document.getElementById('cfg-hp').value),
-            neg: document.getElementById('cfg-neg').checked
+            seed: Math.random() // Herkesin aynı sayıları görmesi için
         };
+        update(roomRef, { status: 'playing', config: config });
+    };
 
-        roomPlayers.forEach(p => p.hp = config.hp);
-        
+    window.startPvE = function() {
+        // Tek kişilik bot simülasyonu
+        const botId = "bot_99";
+        set(ref(db, `gameRoom/players/${botId}`), {
+            id: botId, name: "SİSTEM (BOT)", hp: 100, avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+        });
+        setTimeout(triggerStart, 500);
+    };
+
+    // --- OYUN MOTORU ---
+    let targetTotal = 0;
+    async function startActualGame(conf) {
         document.getElementById('lobby-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         
-        renderHealth();
-        playGame();
+        renderHP(conf.hp);
+        const display = document.getElementById('num-display');
+        targetTotal = 0;
+
+        // Seeded Random (Aynı sayılar)
+        let rng = conf.seed;
+        for (let i = 0; i < conf.count; i++) {
+            let n = Math.floor(Math.abs(Math.sin(rng++)) * (Math.pow(10, conf.digits) - Math.pow(10, conf.digits-1))) + Math.pow(10, conf.digits-1);
+            targetTotal += n;
+            display.innerText = "+" + n;
+            await new Promise(r => setTimeout(r, conf.speed));
+            display.innerText = "";
+            await new Promise(r => setTimeout(r, 100));
+        }
+        display.innerText = "???";
+        document.getElementById('action-zone').classList.remove('hidden');
     }
 
-    function renderHealth() {
+    function renderHP(maxHp) {
         const ui = document.getElementById('hp-ui');
-        ui.innerHTML = roomPlayers.map(p => `
+        ui.innerHTML = Object.values(allPlayers).map(p => `
             <div style="flex:1">
-                <div style="font-size:11px; text-align:left;">${p.name}</div>
+                <div style="font-size:10px;">${p.name}</div>
                 <div class="hp-bar"><div id="bar-${p.id}" class="hp-fill"></div></div>
             </div>
         `).join('');
     }
 
-    async function playGame() {
-        const display = document.getElementById('num-display');
-        total = 0;
+    window.submitGuess = function() {
+        const guess = parseInt(document.getElementById('user-guess').value);
+        const diff = Math.abs(targetTotal - guess);
+        alert(`Gerçek Toplam: ${targetTotal}\nFarkın: ${diff}`);
+        // Burada hasar mekaniği Firebase üzerinden senkronize edilebilir
+        location.reload(); 
+    };
 
-        for (let i = 0; i < config.count; i++) {
-            let min = Math.pow(10, config.digits - 1);
-            let max = Math.pow(10, config.digits) - 1;
-            let n = Math.floor(Math.random() * (max - min + 1)) + min;
-            
-            if (config.neg && Math.random() < 0.2) n = -n;
-            total += n;
-
-            display.innerText = (n > 0 ? "+" : "") + n;
-            display.style.color = n < 0 ? "var(--danger)" : "var(--primary)";
-            
-            await new Promise(r => setTimeout(r, config.speed));
-            display.innerText = "";
-            await new Promise(r => setTimeout(r, 80));
-        }
-
-        display.innerText = "???";
-        document.getElementById('action-zone').classList.remove('hidden');
-    }
-
-    function submitGuess() {
-        const myGuess = parseInt(document.getElementById('user-guess').value);
-        if(isNaN(myGuess)) return;
-
-        // Bot tahmini (PvE ise) veya 2. Oyuncu simülasyonu
-        const otherGuess = total + (Math.floor(Math.random() * 10) - 5);
-        
-        const myDiff = Math.abs(total - myGuess);
-        const otherDiff = Math.abs(total - otherGuess);
-
-        if (myDiff > otherDiff) {
-            roomPlayers[0].hp -= myDiff;
-        } else if (otherDiff > myDiff) {
-            roomPlayers[1].hp -= otherDiff;
-        }
-
-        updateUI();
-    }
-
-    function updateUI() {
-        roomPlayers.forEach(p => {
-            const bar = document.getElementById(`bar-${p.id}`);
-            bar.style.width = (p.hp / config.hp * 100) + "%";
-        });
-
-        if (roomPlayers.some(p => p.hp <= 0)) {
-            alert("OYUN TAMAMLANDI");
-            location.reload();
-        } else {
-            document.getElementById('action-zone').classList.add('hidden');
-            document.getElementById('user-guess').value = "";
-            setTimeout(playGame, 2000);
-        }
-    }
+    // Fotoğraf İşlemi
+    document.getElementById('file-input').onchange = e => {
+        const r = new FileReader();
+        r.onload = () => { document.getElementById('avatar-preview').src = r.result; me.avatar = r.result; };
+        r.readAsDataURL(e.target.files[0]);
+    };
 </script>
 </body>
 </html>
